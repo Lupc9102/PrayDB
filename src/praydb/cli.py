@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any, Optional
+
+from .core import PrayDB, PrayDBError
+
+
+def _print_json(value: Any) -> None:
+    print(json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False, default=str))
+
+
+def _parse_value(raw: str) -> Any:
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="praydb",
+        description="PrayDB: the database that stores everything in one JSON file and prays.",
+    )
+    parser.add_argument("--api-key", help="OpenRouter API key. Defaults to OPENROUTER_API_KEY.")
+    parser.add_argument("--model", default="openai/gpt-4o-mini", help="OpenRouter model name.")
+    parser.add_argument("--file", default=None, help="JSON file path. Default: ~/.praydb/db.json")
+    parser.add_argument("--base-url", default="https://openrouter.ai/api/v1", help="OpenRouter-compatible base URL.")
+    parser.add_argument("--timeout", type=int, default=30, help="HTTP timeout in seconds.")
+    parser.add_argument("--retries", type=int, default=3, help="Retry attempts for model calls.")
+    parser.add_argument("--temperature", type=float, default=0, help="Model temperature.")
+    parser.add_argument("--max-tokens", type=int, default=2048, help="Max response tokens.")
+
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    set_parser = subparsers.add_parser("set", help="Set a key to a value.")
+    set_parser.add_argument("key")
+    set_parser.add_argument("value")
+
+    get_parser = subparsers.add_parser("get", help="Get one key or the whole state.")
+    get_parser.add_argument("key", nargs="?")
+
+    subparsers.add_parser("dump", help="Dump the full database state (AI reads it).")
+    subparsers.add_parser("keys", help="List top-level keys.")
+
+    delete_parser = subparsers.add_parser("delete", help="Delete one key.")
+    delete_parser.add_argument("key")
+
+    subparsers.add_parser("reset", help="Wipe the entire database.")
+    subparsers.add_parser("doctor", help="Run an end-to-end model test.")
+
+    return parser
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    file = args.file or str(Path.home() / ".praydb" / "db.json")
+    api_key = args.api_key or os.environ.get("OPENROUTER_API_KEY")
+
+    try:
+        db = PrayDB(
+            api_key=api_key,
+            model=args.model,
+            file=file,
+            base_url=args.base_url,
+            timeout=args.timeout,
+            retries=args.retries,
+            temperature=args.temperature,
+            max_tokens=args.max_tokens,
+        )
+
+        if args.command == "set":
+            result = db.set(args.key, _parse_value(args.value))
+            _print_json(result)
+            return 0
+
+        if args.command == "get":
+            result = db.get(args.key)
+            _print_json(result)
+            return 0
+
+        if args.command == "dump":
+            result = db.dump()
+            _print_json(result)
+            return 0
+
+        if args.command == "keys":
+            _print_json(db.keys())
+            return 0
+
+        if args.command == "delete":
+            result = db.delete(args.key)
+            _print_json(result)
+            return 0
+
+        if args.command == "reset":
+            result = db.reset()
+            _print_json(result)
+            return 0
+
+        if args.command == "doctor":
+            result = db.doctor()
+            _print_json(result)
+            return 0 if result.get("ok") else 2
+
+    except PrayDBError as exc:
+        print(f"PrayDB error: {exc}", file=sys.stderr)
+        return 1
+
+    parser.print_help()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

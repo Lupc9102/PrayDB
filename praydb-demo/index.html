@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PrayDB — Demo</title>
+<meta name="description" content="Try PrayDB in your browser." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
+<style>
+:root{--paper:#f4efe4;--paper2:#fffaf0;--ink:#11100e;--muted:#6f675d;--line:#11100e;--blue:#0047ff;--red:#ff3b1f;--shadow:18px 18px 0 var(--ink)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:linear-gradient(90deg,rgba(0,71,255,.10) 0 1px,transparent 1px),linear-gradient(rgba(0,71,255,.10) 0 1px,transparent 1px),var(--paper);background-size:42px 42px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Space Grotesk",system-ui,sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 260 260' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");mix-blend-mode:multiply}.wrap{position:relative;width:min(1200px,calc(100% - 28px));margin:auto;padding-bottom:60px}.hero{padding:24px 0 20px}h1{font-family:Fraunces,"Times New Roman",serif;font-size:clamp(2rem,5vw,3.2rem);line-height:.82;letter-spacing:-.06em;margin:0 0 6px;font-weight:500}.lede{font-size:.95rem;line-height:1.5;color:var(--muted);max-width:600px}a.home{display:inline-block;border:3px solid var(--line);background:var(--paper2);color:var(--ink);padding:6px 12px;text-decoration:none;font-weight:800;font-size:.8rem;margin-bottom:12px}.cmd-bar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;border:3px solid var(--line);background:var(--paper2);box-shadow:var(--shadow);padding:16px 20px;margin-bottom:20px}.cmd-bar label{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;display:block;margin-bottom:2px}.cmd-bar select,.cmd-bar input{height:36px;padding:6px 10px;border:2px solid var(--line);background:var(--paper);font-family:inherit;font-size:.85rem}.cmd-bar select{width:100px}.cmd-bar input.key-input{width:140px}.cmd-bar input.val-input{width:200px}.cmd-bar .btn-run{height:36px;padding:0 18px;border:3px solid var(--line);background:var(--ink);color:var(--paper2);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}.cmd-bar .btn-run:disabled{opacity:.4;cursor:not-allowed}.cmd-bar .btn-run:hover:not(:disabled){opacity:.85}.cmd-bar .field-group{display:flex;flex-direction:column}.examples{display:flex;gap:6px;flex-wrap:wrap}.examples button{padding:4px 10px;border:2px solid var(--line);background:var(--paper);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer}.examples button:hover{background:var(--ink);color:var(--paper2)}.quick-cmds{display:flex;gap:4px;flex-wrap:wrap}.quick-cmds button{padding:4px 10px;border:2px solid var(--line);background:var(--paper);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer}.quick-cmds button:hover{background:var(--ink);color:var(--paper2)}.panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.panel{border:3px solid var(--line);background:var(--paper2);box-shadow:var(--shadow);overflow:hidden}.panel h2{font-family:Fraunces,"Times New Roman",serif;font-size:1.1rem;letter-spacing:-.02em;margin:0;padding:12px 16px;border-bottom:3px solid var(--line);font-weight:500;display:flex;justify-content:space-between;align-items:center}.panel h2 span{font-size:.7rem;font-family:"Space Grotesk",system-ui,sans-serif;color:var(--muted);font-weight:400;letter-spacing:0}.panel-body{font-family:"SF Mono","Space Grotesk",monospace;font-size:.78rem;line-height:1.5;white-space:pre-wrap;word-break:break-all;overflow:auto;max-height:70vh;min-height:300px;padding:14px 16px}.panel-body .empty{color:var(--muted);font-style:italic}.panel-body .dim{color:var(--muted)}.loading-dot{display:inline-block;width:8px;height:8px;background:var(--ink);border-radius:50%;animation:blink 1s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.err{color:var(--red)}.tutorial{margin-top:28px;border:3px solid var(--line);background:var(--paper2);box-shadow:var(--shadow);padding:24px 28px}.tutorial h2{font-family:Fraunces,"Times New Roman",serif;font-size:1.6rem;letter-spacing:-.03em;margin:0 0 14px;font-weight:500}.tutorial h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:20px 0 10px}.tutorial p{font-size:.9rem;line-height:1.6;color:var(--muted);margin:0 0 8px}.tutorial code{background:var(--ink);color:#f8e8c8;padding:1px 5px;font-size:.85rem}.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin:8px 0}.toc-grid div{font-size:.85rem;line-height:1.5;color:var(--muted);padding:6px 0}.toc-grid div b{color:var(--ink)}@media(max-width:860px){.panels{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<nav class="hero"><a class="home" href="/praydb">&larr; Back</a><h1>PrayDB &middot; Demo</h1><p class="lede">A client-side PrayDB using Puter.js. You pay for the model tokens, not me. (THERES A FREE TRIAL THO SO ENJOY ;3)</p></nav>
+
+<div class="cmd-bar">
+<div class="field-group"><label>Op</label><select id="op"><option value="set">set</option><option value="get">get</option><option value="delete">delete</option><option value="reset">reset</option><option value="dump">dump</option><option value="insert">insert</option><option value="search">search</option></select></div>
+<div class="field-group"><label>Key</label><input class="key-input" id="key" placeholder="key" /></div>
+<div class="field-group"><label>Value</label><input class="val-input" id="value" placeholder='e.g. "GMT+3"' /></div>
+<button class="btn-run" id="runBtn">Run</button>
+<div class="field-group">
+<label>Load</label>
+<div class="examples">
+<button data-example="userdb">User DB</button>
+<button data-example="catalog">Catalog</button>
+<button data-example="config">Config</button>
+<button data-example="analytics">Analytics</button>
+<button data-example="empty">Empty</button>
+</div>
+</div>
+<div class="field-group">
+<label>Quick</label>
+<div class="quick-cmds">
+<button data-cmd='set timezone "GMT+3"'>set tz</button>
+<button data-cmd='set vibe "only PrayDB"'>vibe</button>
+<button data-cmd='get timezone'>get tz</button>
+<button data-cmd='dump'>dump</button>
+<button data-cmd='set city {"name":"Berlin","tz":"CET"}'>city</button>
+<button data-cmd='insert {"id":"user","role":"admin"}'>insert</button>
+<button data-cmd='delete vibe'>del vibe</button>
+</div>
+</div>
+</div>
+
+<div class="panels">
+<div class="panel">
+<h2>Input <span>HolyBook + operation</span></h2>
+<div class="panel-body" id="inputPanel">{ } — empty HolyBook</div>
+</div>
+<div class="panel">
+<h2>Output <span>model response</span></h2>
+<div class="panel-body" id="outputPanel"><span class="empty">Run a command to see raw output.</span></div>
+</div>
+</div>
+
+<div class="tutorial">
+<h2>Tutorial</h2>
+<p><strong>PrayDB</strong> is a little database. Your data is a JSON blob (called a "HolyBook"). Every time you do something to it, an AI reads it, thinks about what you want, and writes back a new version. This runs in your browser using <strong>Puter.js</strong> — you pay for the AI power.</p>
+
+<div class="toc-grid">
+<div><b>Command bar</b> — pick what you want to do, type a key and value, click Run.</div>
+<div><b>Load buttons</b> — fill the HolyBook with big example JSONs so you can mess around.</div>
+<div><b>Quick buttons</b> — shortcuts so you don't have to type everything.</div>
+<div><b>Input panel</b> — the exact message sent to the AI (HolyBook + what you asked).</div>
+<div><b>Output panel</b> — the raw reply the AI sends back.</div>
+</div>
+
+<h3>What you can do</h3>
+<div class="toc-grid">
+<div><code>set</code> — save something (local, instant). "set color red" makes the HolyBook have <code>color: "red"</code>.</div>
+<div><code>get</code> — look something up (uses AI). "get color" tells you what color is.</div>
+<div><code>delete</code> — remove something (local, instant). "delete color" takes color out of the HolyBook.</div>
+<div><code>dump</code> — show everything in the HolyBook (uses AI).</div>
+<div><code>reset</code> — empty the HolyBook completely (local, instant), like factory reset.</div>
+<div><code>insert</code> — add a whole JSON document to a list called <code>_documents</code> (local, instant).</div>
+<div><code>search</code> — find documents in <code>_documents</code> that match something (uses AI).</div>
+</div>
+
+<h3>How it works</h3>
+<p>When you <strong>write</strong> (set, delete, reset, insert), the demo edits your HolyBook directly — no AI, instant, like a real database. When you <strong>read</strong> (get, dump, search), it sends your HolyBook to <code>gpt-5.4-nano</code> (a free-ish AI) through Puter.js, and the AI reads it and tells you what you asked for. <strong>Input</strong> shows what went <em>in</em>. <strong>Output</strong> shows what came <em>out</em>. If the AI messes up, you'll see an error.</p>
+</div>
+</main>
+
+<script>
+const inputEl = document.getElementById('inputPanel');
+const outputEl = document.getElementById('outputPanel');
+const opEl = document.getElementById('op');
+const keyEl = document.getElementById('key');
+const valEl = document.getElementById('value');
+const runBtn = document.getElementById('runBtn');
+
+let holyBook = {};
+
+const EXAMPLES = {
+  userdb: {
+    "_users": [
+      { "id": "alice", "email": "alice@example.com", "role": "admin", "preferences": { "theme": "dark", "notifications": true, "language": "en" }, "created": "2024-01-15", "lastLogin": "2025-06-17T14:32:00Z", "metadata": { "ip": "192.168.1.42", "userAgent": "Mozilla/5.0", "sessionCount": 1423, "flags": ["beta", "vip"] }, "address": { "street": "123 Main St", "city": "Portland", "zip": "97201", "country": "US" } },
+      { "id": "bob", "email": "bob@corp.net", "role": "editor", "preferences": { "theme": "light", "notifications": false, "language": "fr" }, "created": "2024-03-22", "lastLogin": "2025-06-16T09:15:00Z", "metadata": { "ip": "10.0.0.55", "userAgent": "Chrome/125", "sessionCount": 87, "flags": ["editor"] }, "address": { "street": "456 Rue Principale", "city": "Montréal", "zip": "H2X 1Y5", "country": "CA" } },
+      { "id": "carol", "email": "carol@test.org", "role": "viewer", "preferences": { "theme": "auto", "notifications": true, "language": "de" }, "created": "2024-07-01", "lastLogin": "2025-05-30T18:45:00Z", "metadata": { "ip": "172.16.0.12", "userAgent": "Firefox/128", "sessionCount": 312, "flags": [] }, "address": { "street": "789 Berliner Str.", "city": "Berlin", "zip": "10115", "country": "DE" } }
+    ],
+    "config": { "maxSessions": 5, "sessionTimeout": 3600, "rateLimit": 100, "features": ["dark_mode", "export", "api_access"] },
+    "stats": { "totalUsers": 3, "activeToday": 1, "storageUsed": "1.2 GB" }
+  },
+
+  catalog: {
+    "products": [
+      { "id": "PROD-001", "name": "Wireless Headphones", "category": "Electronics", "price": 89.99, "currency": "USD", "inStock": true, "variants": [{ "color": "black", "sku": "WH-BLK-001", "qty": 45 }, { "color": "white", "sku": "WH-WHT-001", "qty": 30 }], "tags": ["audio", "wireless", "bluetooth"], "rating": 4.5, "reviews": 234, "dimensions": { "weight": "0.3 kg", "size": "18 x 15 x 7 cm" } },
+      { "id": "PROD-002", "name": "Mechanical Keyboard", "category": "Electronics", "price": 149.99, "currency": "USD", "inStock": true, "variants": [{ "color": "silver", "sku": "MK-SLV-002", "qty": 22 }, { "color": "black", "sku": "MK-BLK-002", "qty": 15 }, { "color": "red", "sku": "MK-RED-002", "qty": 8 }], "tags": ["keyboard", "mechanical", "rgb"], "rating": 4.8, "reviews": 567, "dimensions": { "weight": "1.1 kg", "size": "44 x 13 x 4 cm" } },
+      { "id": "PROD-003", "name": "Ultra HD Monitor 27\"", "category": "Displays", "price": 449.99, "currency": "USD", "inStock": false, "variants": [{ "color": "black", "sku": "UHD-27-003", "qty": 0 }], "tags": ["monitor", "4k", "ips"], "rating": 4.6, "reviews": 891, "dimensions": { "weight": "5.2 kg", "size": "61 x 36 x 20 cm" } },
+      { "id": "PROD-004", "name": "USB-C Hub 12-in-1", "category": "Accessories", "price": 39.99, "currency": "USD", "inStock": true, "variants": [{ "color": "gray", "sku": "USB-C-004", "qty": 120 }], "tags": ["usb-c", "hub", "adapter"], "rating": 4.2, "reviews": 1456, "dimensions": { "weight": "0.12 kg", "size": "12 x 4 x 1.5 cm" } },
+      { "id": "PROD-005", "name": "Ergonomic Office Chair", "category": "Furniture", "price": 699.99, "currency": "USD", "inStock": true, "variants": [{ "color": "black", "sku": "CHAIR-BLK-005", "qty": 12 }, { "color": "gray", "sku": "CHAIR-GRY-005", "qty": 7 }], "tags": ["chair", "ergonomic", "office"], "rating": 4.7, "reviews": 345, "dimensions": { "weight": "18 kg", "size": "70 x 65 x 120 cm" } }
+    ],
+    "categories": ["Electronics", "Displays", "Accessories", "Furniture"],
+    "warehouse": { "location": "Memphis, TN", "totalItems": 604, "lastRestock": "2025-06-15" }
+  },
+
+  config: {
+    "service": "praydb-api",
+    "version": "3.2.1",
+    "environment": "staging",
+    "logging": { "level": "debug", "format": "json", "outputs": ["stdout", "graylog"], "samplingRate": 0.1, "sensitiveFields": ["password", "token", "ssn"] },
+    "database": { "host": "pg-cluster-01.internal", "port": 5432, "name": "praydb_prod", "poolSize": 20, "ssl": true, "backupSchedule": "0 3 * * *", "retentionDays": 30 },
+    "cache": { "provider": "redis", "nodes": ["redis-01:6379", "redis-02:6379", "redis-03:6379"], "ttl": 300, "maxMemory": "4gb", "evictionPolicy": "allkeys-lru" },
+    "auth": { "jwtSecret": "****", "tokenExpiry": 3600, "refreshExpiry": 604800, "providers": ["local", "google", "github"], "mfaRequired": false, "rateLimit": { "window": 900, "maxAttempts": 5 } },
+    "rateLimit": { "global": { "windowMs": 60000, "max": 1000 }, "endpoints": { "/api/set": { "windowMs": 60000, "max": 60 }, "/api/search": { "windowMs": 60000, "max": 300 } } },
+    "features": { "experimental": { "vectorSearch": false, "realtimeSync": true, "llmRouting": "auto" }, "beta": ["newDashboard", "webhooks"], "deprecated": ["v1_api"] }
+  },
+
+  analytics: {
+    "events": [
+      { "id": "evt_001", "type": "page_view", "userId": "alice", "timestamp": "2025-06-17T10:00:00Z", "properties": { "page": "/praydb", "referrer": "github.com", "duration": 45000, "device": "desktop", "browser": "Chrome", "os": "macOS" } },
+      { "id": "evt_002", "type": "click", "userId": "alice", "timestamp": "2025-06-17T10:00:45Z", "properties": { "element": "demo_button", "page": "/praydb", "x": 320, "y": 580 } },
+      { "id": "evt_003", "type": "api_call", "userId": "bob", "timestamp": "2025-06-17T10:01:12Z", "properties": { "endpoint": "/api/set", "method": "POST", "status": 200, "duration": 340, "model": "gpt-5.4-nano" } },
+      { "id": "evt_004", "type": "error", "userId": "carol", "timestamp": "2025-06-17T09:58:00Z", "properties": { "code": "PARSE_ERROR", "message": "Invalid JSON in HolyBook", "severity": "warning", "stack": "at mergeScroll (core.js:142)" } },
+      { "id": "evt_005", "type": "page_view", "userId": "bob", "timestamp": "2025-06-17T09:45:00Z", "properties": { "page": "/docs", "referrer": "direct", "duration": 120000, "device": "mobile", "browser": "Safari", "os": "iOS" } }
+    ],
+    "summary": { "totalEvents": 5, "uniqueUsers": 3, "errorRate": 0.2, "avgResponseTime": 340, "topPages": [["/praydb", 2], ["/docs", 1]], "topDevices": { "desktop": 2, "mobile": 1 } },
+    "funnels": [
+      { "name": "signup", "steps": ["landing", "register", "verify", "onboard", "first_action"], "conversion": { "landing": 1000, "register": 342, "verify": 298, "onboard": 210, "first_action": 185 } }
+    ]
+  }
+};
+
+function buildReadPrompt(op, key, value) {
+  return `You are PrayDB. You read from a JSON HolyBook. Current HolyBook:
+
+\`\`\`json
+${JSON.stringify(holyBook, null, 2)}
+\`\`\`
+
+The user wants to read: "${op}"${key ? `, key: "${key}"` : ''}${value ? `, value: ${value}` : ''}
+
+Rules:
+- Return ONLY {"result": <string>}
+- For "get": result = the value at the given key (or "not found")
+- For "dump": result = the full HolyBook as JSON
+- For "search": find documents in _documents array matching the key/value pattern and return them
+
+DO NOT modify the HolyBook. Read only. Valid JSON only. No prose.`;
+}
+
+function renderInput() {
+  const op = opEl.value;
+  const key = keyEl.value.trim();
+  const value = valEl.value.trim();
+  if (isReadOp(op)) {
+    inputEl.textContent = buildReadPrompt(op, key, value);
+  } else {
+    inputEl.textContent = `// Current HolyBook after local ${op}:\n\n${JSON.stringify(holyBook, null, 2)}`;
+  }
+}
+
+function renderAll() {
+  renderInput();
+}
+
+function isReadOp(op) {
+  return op === 'get' || op === 'dump' || op === 'search';
+}
+
+function tryParseJSON(s) {
+  try { return JSON.parse(s); } catch { return s; }
+}
+
+function loadExample(name) {
+  if (name === 'empty') {
+    holyBook = {};
+  } else if (EXAMPLES[name]) {
+    holyBook = JSON.parse(JSON.stringify(EXAMPLES[name]));
+  }
+  renderAll();
+  outputEl.innerHTML = '<span class="empty">Loaded example. Try a command.</span>';
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function loading(on) {
+  runBtn.disabled = on;
+  runBtn.textContent = on ? 'Running...' : 'Run';
+}
+
+async function runOp(op, key, value) {
+  if (isReadOp(op)) {
+    const prompt = buildReadPrompt(op, key, value);
+    inputEl.textContent = prompt;
+    outputEl.innerHTML = '<span class="dim">Reading with AI<span class="loading-dot"></span></span>';
+    try {
+      const res = await puter.ai.chat(prompt, {
+        model: 'gpt-5.4-nano',
+        temperature: 0,
+        max_tokens: 4096,
+      });
+      const text = typeof res === 'string' ? res : (res?.message?.content || res?.toString?.() || '');
+      outputEl.textContent = text;
+      const cleaned = text.replace(/```json|```/g, '').trim();
+      const json = JSON.parse(cleaned);
+      if (json.result !== undefined) {
+        outputEl.textContent = typeof json.result === 'object' ? JSON.stringify(json.result, null, 2) : String(json.result);
+      }
+    } catch (e) {
+      outputEl.innerHTML = `<span class="err">ERROR: ${escapeHtml(e.message)}</span>`;
+    }
+  } else {
+    // Local writes — no AI
+    let result = '';
+    switch (op) {
+      case 'set': {
+        const parsed = tryParseJSON(value);
+        holyBook[key] = parsed;
+        result = `Set ${key} = ${JSON.stringify(parsed)}`;
+        break;
+      }
+      case 'delete': {
+        if (key in holyBook) {
+          delete holyBook[key];
+          result = `Deleted "${key}"`;
+        } else {
+          result = `Key "${key}" not found`;
+        }
+        break;
+      }
+      case 'reset': {
+        holyBook = {};
+        result = 'HolyBook reset.';
+        break;
+      }
+      case 'insert': {
+        const parsed = tryParseJSON(value);
+        if (!holyBook._documents) holyBook._documents = [];
+        holyBook._documents.push(parsed);
+        result = `Inserted ${JSON.stringify(parsed)}`;
+        break;
+      }
+    }
+    outputEl.textContent = result;
+    renderInput();
+  }
+}
+
+runBtn.addEventListener('click', async () => {
+  loading(true);
+  await runOp(opEl.value, keyEl.value.trim(), valEl.value.trim());
+  loading(false);
+});
+
+document.querySelectorAll('.quick-cmds button').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const parts = btn.dataset.cmd.match(/(\S+?)\s+(.+)/);
+    if (!parts) return;
+    const op = parts[1], rest = parts[2];
+    if (op === 'dump' || op === 'reset') {
+      opEl.value = op; keyEl.value = ''; valEl.value = '';
+    } else if (op === 'delete') {
+      opEl.value = op; keyEl.value = rest; valEl.value = '';
+    } else if (op === 'insert') {
+      opEl.value = op; keyEl.value = ''; valEl.value = rest;
+    } else if (op === 'set') {
+      const m = rest.match(/(\S+)\s+(.+)/);
+      if (m) { opEl.value = op; keyEl.value = m[1]; valEl.value = m[2]; }
+    } else {
+      opEl.value = op; keyEl.value = rest; valEl.value = '';
+    }
+    loading(true);
+    await runOp(opEl.value, keyEl.value, valEl.value);
+    loading(false);
+  });
+});
+
+document.querySelectorAll('[data-example]').forEach(btn => {
+  btn.addEventListener('click', () => loadExample(btn.dataset.example));
+});
+
+opEl.addEventListener('change', renderInput);
+keyEl.addEventListener('input', renderInput);
+valEl.addEventListener('input', renderInput);
+
+renderInput();
+outputEl.innerHTML = '<span class="empty">Run a command to see raw output.</span>';
+</script>
+</body>
+</html>
