@@ -201,7 +201,7 @@ def run_demo(db: PrayDB):
             console.print(f"[red]Error:[/red] {e}")
         if i < len(steps):
             ans= Prompt.ask("[dim] Press Enter for next step or q to quit (real gamblers never quit)", default="")
-            if ans.strip().lowe() == "q":
+            if ans.strip().lower() == "q":
                 break
     console.rule("[bold magenta]Demo complete![/bold magenta]")
 
