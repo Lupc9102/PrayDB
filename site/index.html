@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PrayDB</title>
+<meta name="description" content="PrayDB stores JSON in an LLM context window and prays." />
+<style>
+:root{--ink:#111;--muted:#555}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;line-height:1.6;padding:20px}
+.wrap{max-width:780px;margin:auto}
+h1{font-size:2.8rem;margin:0 0 10px;font-weight:700}
+h2{font-size:1.6rem;margin:30px 0 12px}
+h3{font-size:1.1rem;margin:24px 0 8px}
+p{color:var(--muted)}
+pre,code{background:#eee;padding:2px 5px;font-size:.9rem}
+pre{padding:14px;overflow:auto;border:1px solid #ddd}
+code{background:#eee}
+a{color:var(--ink)}
+.layout{display:flex;flex-direction:column;gap:12px}
+.toc{display:flex;flex-wrap:wrap;gap:8px 16px;padding:12px 0;border-bottom:1px solid #ddd;margin-bottom:8px}
+.toc b{display:none}
+.toc a{color:var(--muted);text-decoration:none;font-size:.9rem}
+.toc a:hover{color:var(--ink)}
+.doc-section{padding:4px 0}
+.doc-section:not(:last-child){border-bottom:1px solid #eee}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.box{border:1px solid #ddd;padding:14px;background:#fff}
+.box b{display:block;margin-bottom:6px}
+.warn{border-color:#999}
+.kicker{font-size:.85rem;color:#555;margin-bottom:6px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<p class="kicker">Only PrayDB. No side quests.</p>
+<h1>PrayDB</h1>
+<p>A cursed Python database that stores JSON in an LLM context window, asks a model to merge it, and prays the answer is valid JSON.</p>
+<div class="layout">
+<div class="toc"><a href="#what">What it is</a><a href="#install">Install</a><a href="#cli">CLI</a><a href="#python">Python API</a><a href="#architecture">Architecture</a><a href="#settings">Model settings</a><a href="#warnings">Warnings</a><a href="#files">Files</a></div>
+<section class="doc-section" id="what"><h2>What it is</h2><p>PrayDB is a tiny Python library and CLI. It keeps a JSON prompt-scroll for a user id, sends that state plus an operation to an OpenRouter model, parses the response, and stores the resulting JSON.</p></section>
+<section class="doc-section" id="install"><h2>Install</h2><pre>cd praydb
+python3 -m pip install -e .</pre><h3>Environment</h3><pre>export OPENROUTER_API_KEY="sk-or-..."
+export PRAYDB_MODEL="provider/sacrifice_model"</pre></section>
+<section class="doc-section" id="cli"><h2>CLI</h2><pre>praydb --user-id lupc set timezone "GMT+3"
+praydb --user-id lupc set vibe "only PrayDB"
+praydb --user-id lupc get timezone
+praydb --user-id lupc dump
+praydb --user-id lupc delete vibe
+praydb --user-id lupc reset --yes
+praydb --user-id lupc doctor</pre><p>By default, PrayDB stores the prompt-scroll at <code>~/.praydb/&lt;user-id&gt;.json</code>. Use <code>--no-context-file</code> for a volatile in-memory scroll.</p></section>
+<section class="doc-section" id="python"><h2>Python API</h2><pre>from praydb import PrayDB, Query
+
+db = PrayDB(
+    api_key="sk-or-...",
+    model="provider/expandable-sacrifice_model",
+    user_id="user",
+)
+
+# Plain JSON fields in the prompt-scroll.
+db.set("timezone", "GMT+3")
+db.set("vibe", {"ui": "squared", "chaos": "low"})
+print(db.get("timezone"))
+
+# TinyDB-like JSON documents, also inside the prompt-scroll.
+User = Query()
+db.insert({"id": "lupc", "timezone": "GMT+3", "role": "admin"})
+db.update({"role": "owner"}, User.id == "lupc")
+print(db.search(User.timezone == "GMT+3"))
+print(db.dump())</pre></section>
+<section class="doc-section" id="architecture"><h2>Architecture</h2><div class="grid"><div class="box"><b>1. Scroll</b><p>A JSON object is kept as the user's prompt-scroll.</p></div><div class="box"><b>2. Prompt</b><p>Every operation inserts the scroll and requested change into a model prompt.</p></div><div class="box"><b>3. Merge</b><p>The model must return one valid JSON object.</p></div><div class="box warn"><b>4. Validate</b><p>Prose responses are rejected. Bad JSON means retry or error.</p></div></div></section>
+<section class="doc-section" id="settings"><h2>Model settings</h2><p>PrayDB defaults to low-temperature, JSON-object responses. Keep temperature at <code>0</code> unless you want the database to improvise jazz.</p><pre>db = PrayDB(
+    api_key="sk-or-...",
+    model="provider/expandable-sacrifice_model",
+    user_id="user",
+    temperature=0,
+    max_tokens=2048,
+    retries=2,
+)</pre></section>
+<section class="doc-section" id="warnings"><h2>Warnings</h2><p>Do not store passwords, secrets, medical data, financial records, or anything that must survive reality. If the model lies, that is not a bug. That is the architecture.</p></section>
+<section class="doc-section" id="files"><h2>Project files</h2><pre>praydb/
+  pyproject.toml
+  README.md
+  LICENSE
+  examples/basic.py
+  tests/test_core.py
+  site/index.html
+  src/praydb/
+    __init__.py
+    core.py
+    cli.py
+    py.typed</pre></section>
+</div>
+</main>
+</body>
+</html>
