@@ -213,7 +213,7 @@ async function runOp(op, key, value) {
   if (isReadOp(op)) {
     const prompt = buildReadPrompt(op, key, value);
     inputEl.textContent = prompt;
-    outputEl.innerHTML = '<span class="dim">Reading with AI<span class="loading-dot"></span></span>';
+    outputEl.innerHTML = '<span class="dim">LLM is praying<span class="loading-dot"></span></span>';
     try {
       const res = await puter.ai.chat(prompt, {
         model: 'gpt-5.4-nano',
