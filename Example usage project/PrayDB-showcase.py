@@ -200,7 +200,7 @@ def run_demo(db: PrayDB):
         except Exception as e:
             console.print(f"[red]Error:[/red] {e}")
         if i < len(steps):
-            ans= Prompt.ask("[dim] Press Enter for next step or q to quit (real gamblers never quit), default="")
+            ans= Prompt.ask("[dim] Press Enter for next step or q to quit (real gamblers never quit)", default="")
             if ans.strip().lowe() == "q":
                 break
     console.rule("[bold magenta]Demo complete![/bold magenta]")
@@ -358,7 +358,7 @@ def main():
         model="openai/gpt-5.4-nano", # cheapest bullsht that might not hallucinate
     )
 
-    cosnole.print(f"[dim]model:[/dim] [cyan]{db.model}[/cyan]   "
+    console.print(f"[dim]model:[/dim] [cyan]{db.model}[/cyan]   "
                   f"[dim]storage:[/dim] [cyan]in-memory[/cyan]   "
                   f"[dim]ACID:[/dim] [magenta]All on red / Crying / Inflation / Despair[/magenta]")
 
