@@ -74,7 +74,7 @@ def print_help():
     t = Table(box=box.SIMPLE, show_header=True, header_style="bold cyan")
     t.add_column("command", style="bold yellow", no_wrap=True)
     t.add_column("description", style="dim")
-    for cmd, desc in COMMANDS.items():
+    for cmd, desc in Commands.items():
         name, _, explanation = desc.partition(" — ")
         local = "[green](local)[/green]" if "(local)" in explanation else ""
         ai    = "[yellow](AI)[/yellow]"  if "(AI)"    in explanation else ""
@@ -94,7 +94,7 @@ def pprint_result(label: str, value, write: bool = False):
 def parse_condition(db_table_docs, field, op, raw_val):
     # Condition for em cli tokens
     Q = Query()
-    q = gettattr(Q, field)
+    q = getattr(Q, field)
     try:
         val = json.loads(raw_val)
     except json.JSONDecodeError:
