@@ -64,7 +64,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <div class="field-group"><label>Value</label><input class="val-input" id="value" placeholder='e.g. "GMT+3"' /></div>
 <button class="btn-run" id="runBtn">Run</button>
 <button class="btn-run advanced-toggle" id="advancedToggle" type="button" aria-pressed="false">Advanced: off</button>
-<div class="field-group advanced-only">
+<div class="field-group">
 <label>Load</label>
 <div class="examples">
 <button data-example="userdb">User DB</button>
@@ -87,7 +87,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 </div>
 </div>
 </div>
-<p class="mode-help" id="modeHelp">Simple mode: use <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.</p>
+<p class="mode-help" id="modeHelp">Simple mode: use the Load buttons to try a premade database, <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.</p>
 
 <div class="panels">
 <div class="panel">
@@ -105,7 +105,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <p><strong>PrayDB</strong> is a little database. Your data is a JSON blob (called a "HolyBook"). Writes happen locally in your browser. Reads go to whichever model provider you picked in the entry popup: OpenRouter with your API key, or Puter.js after browser authentication.</p>
 
 <div class="toc-grid">
-<div><b>Simple mode</b> — only the basics: save a key, read a key, or dump the whole HolyBook.</div>
+<div><b>Simple mode</b> — Load premade databases, save a key, read a key, or dump the whole HolyBook.</div>
 <div><b>Advanced mode</b> — unlock delete, reset, insert, search, examples, and quick command shortcuts.</div>
 <div><b>Input panel</b> — the exact message sent to the AI (HolyBook + what you asked).</div>
 <div><b>Output panel</b> — the raw reply the AI sends back.</div>
@@ -242,7 +242,7 @@ function setAdvancedMode(on) {
   advancedToggle.textContent = advancedMode ? 'Advanced: on' : 'Advanced: off';
   modeHelp.innerHTML = advancedMode
     ? 'Advanced mode: destructive and document actions are unlocked. Use <strong>delete</strong>, <strong>reset</strong>, <strong>insert</strong>, and <strong>search</strong> carefully.'
-    : 'Simple mode: use <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.';
+    : 'Simple mode: use the Load buttons to try a premade database, <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.';
   renderInput();
 }
 
