@@ -17,6 +17,9 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <style>
 .provider-note{display:inline-flex;align-items:center;border:2px solid var(--line);background:var(--paper2);padding:6px 10px;font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.provider-note span{color:var(--blue);margin-left:6px}.setup-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(17,16,14,.74)}.setup-modal.is-hidden{display:none}.setup-card{width:min(860px,100%);max-height:calc(100vh - 36px);overflow:auto;border:4px solid var(--line);background:var(--paper2);box-shadow:18px 18px 0 var(--ink);padding:24px}.setup-card h2{font-family:Fraunces,"Times New Roman",serif;font-size:clamp(2rem,5vw,3.8rem);line-height:.86;letter-spacing:-.06em;margin:0 0 8px}.setup-card p{color:var(--muted);line-height:1.45}.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}.setup-option{border:3px solid var(--line);background:var(--paper);padding:16px}.setup-option h3{margin:0 0 8px;font-size:1rem;text-transform:uppercase;letter-spacing:.1em}.setup-option label{display:block;margin:12px 0 4px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em}.setup-option input,.setup-option select{width:100%;height:40px;border:2px solid var(--line);background:var(--paper2);padding:8px 10px;font:inherit}.setup-option ul{padding-left:18px;color:var(--muted);line-height:1.45}.setup-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.setup-actions button{border:3px solid var(--line);background:var(--ink);color:var(--paper2);padding:10px 14px;font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:.07em;cursor:pointer}.setup-actions button.secondary{background:var(--blue)}.setup-actions button:hover{opacity:.85}.setup-error{min-height:1.3em;color:var(--red);font-weight:900}.badge{display:inline-block;margin-left:6px;border:2px solid var(--line);background:var(--red);color:white;padding:1px 5px;font-size:.66rem;vertical-align:middle}.fine-print{font-size:.82rem}@media(max-width:820px){.setup-grid{grid-template-columns:1fr}.setup-card{box-shadow:9px 9px 0 var(--ink);padding:18px}}
 </style>
+<style>
+.advanced-only.is-hidden,.field-group.is-hidden{display:none}.advanced-toggle{background:var(--blue)!important}.mode-help{width:100%;margin:4px 0 0;color:var(--muted);font-size:.86rem;line-height:1.45}.mode-help strong{color:var(--ink)}
+</style>
 </head>
 <body>
 <div class="setup-modal" id="setupModal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
@@ -43,7 +46,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <ul>
 <li>Puter.js loads from <code>https://js.puter.com/v2/</code>.</li>
 <li>You must authenticate with Puter in the browser to access its models.</li>
-<li>Puter uses a user-pays flow, so your account covers model usage instead of the site owner.</li>
+<li>Puter uses a user-pays flow, so your account covers model usage instead of the site owner. (IT HAS A FREE TRIAL!!)</li>
 </ul>
 <div class="setup-actions"><button class="secondary" id="usePuterBtn">Authenticate with Puter.js</button></div>
 </div>
@@ -56,11 +59,12 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <nav class="hero"><a class="home" href="/praydb">&larr; Back</a><h1>PrayDB &middot; Demo</h1><p class="lede">A client-side PrayDB demo where reads can use either your OpenRouter key or authenticated Puter.js. The setup popup appears on every visit and saves nothing.</p><p class="provider-note">Provider:<span id="providerStatus">choose in popup</span></p></nav>
 
 <div class="cmd-bar">
-<div class="field-group"><label>Op</label><select id="op"><option value="set">set</option><option value="get">get</option><option value="delete">delete</option><option value="reset">reset</option><option value="dump">dump</option><option value="insert">insert</option><option value="search">search</option></select></div>
+<div class="field-group"><label>Action</label><select id="op"></select></div>
 <div class="field-group"><label>Key</label><input class="key-input" id="key" placeholder="key" /></div>
 <div class="field-group"><label>Value</label><input class="val-input" id="value" placeholder='e.g. "GMT+3"' /></div>
 <button class="btn-run" id="runBtn">Run</button>
-<div class="field-group">
+<button class="btn-run advanced-toggle" id="advancedToggle" type="button" aria-pressed="false">Advanced: off</button>
+<div class="field-group advanced-only">
 <label>Load</label>
 <div class="examples">
 <button data-example="userdb">User DB</button>
@@ -70,7 +74,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <button data-example="empty">Empty</button>
 </div>
 </div>
-<div class="field-group">
+<div class="field-group advanced-only">
 <label>Quick</label>
 <div class="quick-cmds">
 <button data-cmd='set timezone "GMT+3"'>set tz</button>
@@ -83,6 +87,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 </div>
 </div>
 </div>
+<p class="mode-help" id="modeHelp">Simple mode: use <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.</p>
 
 <div class="panels">
 <div class="panel">
@@ -100,9 +105,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <p><strong>PrayDB</strong> is a little database. Your data is a JSON blob (called a "HolyBook"). Writes happen locally in your browser. Reads go to whichever model provider you picked in the entry popup: OpenRouter with your API key, or Puter.js after browser authentication.</p>
 
 <div class="toc-grid">
-<div><b>Command bar</b> — pick what you want to do, type a key and value, click Run.</div>
-<div><b>Load buttons</b> — fill the HolyBook with big example JSONs so you can mess around.</div>
-<div><b>Quick buttons</b> — shortcuts so you don't have to type everything.</div>
+<div><b>Simple mode</b> — only the basics: save a key, read a key, or dump the whole HolyBook.</div>
+<div><b>Advanced mode</b> — unlock delete, reset, insert, search, examples, and quick command shortcuts.</div>
 <div><b>Input panel</b> — the exact message sent to the AI (HolyBook + what you asked).</div>
 <div><b>Output panel</b> — the raw reply the AI sends back.</div>
 </div>
@@ -111,8 +115,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <div class="toc-grid">
 <div><code>set</code> — save something (local, instant). "set color red" makes the HolyBook have <code>color: "red"</code>.</div>
 <div><code>get</code> — look something up (uses AI). "get color" tells you what color is.</div>
-<div><code>delete</code> — remove something (local, instant). "delete color" takes color out of the HolyBook.</div>
 <div><code>dump</code> — show everything in the HolyBook (uses AI).</div>
+<div><code>delete</code> — remove something (local, instant). "delete color" takes color out of the HolyBook.</div>
 <div><code>reset</code> — empty the HolyBook completely (local, instant), like factory reset.</div>
 <div><code>insert</code> — add a whole JSON document to a list called <code>_documents</code> (local, instant).</div>
 <div><code>search</code> — find documents in <code>_documents</code> that match something (uses AI).</div>
@@ -129,7 +133,11 @@ const outputEl = document.getElementById('outputPanel');
 const opEl = document.getElementById('op');
 const keyEl = document.getElementById('key');
 const valEl = document.getElementById('value');
+const keyGroup = keyEl.closest('.field-group');
+const valGroup = valEl.closest('.field-group');
 const runBtn = document.getElementById('runBtn');
+const advancedToggle = document.getElementById('advancedToggle');
+const modeHelp = document.getElementById('modeHelp');
 const setupModal = document.getElementById('setupModal');
 const setupError = document.getElementById('setupError');
 const openrouterKeyEl = document.getElementById('openrouterKey');
@@ -140,6 +148,20 @@ const usePuterBtn = document.getElementById('usePuterBtn');
 
 let holyBook = {};
 let aiProvider = null;
+let advancedMode = false;
+
+const BASIC_OPS = [
+  ['set', 'set: save a value'],
+  ['get', 'get: ask for a key'],
+  ['dump', 'dump: show all'],
+];
+
+const ADVANCED_OPS = [
+  ['delete', 'delete: remove a key'],
+  ['reset', 'reset: wipe all'],
+  ['insert', 'insert: add document'],
+  ['search', 'search: find documents'],
+];
 
 const EXAMPLES = {
   userdb: {
@@ -209,10 +231,41 @@ Rules:
 DO NOT modify the HolyBook. Read only. Valid JSON only. No prose.`;
 }
 
+function setAdvancedMode(on) {
+  advancedMode = on;
+  const current = opEl.value;
+  const ops = advancedMode ? BASIC_OPS.concat(ADVANCED_OPS) : BASIC_OPS;
+  opEl.innerHTML = ops.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+  opEl.value = ops.some(([value]) => value === current) ? current : 'set';
+  document.querySelectorAll('.advanced-only').forEach(el => el.classList.toggle('is-hidden', !advancedMode));
+  advancedToggle.setAttribute('aria-pressed', String(advancedMode));
+  advancedToggle.textContent = advancedMode ? 'Advanced: on' : 'Advanced: off';
+  modeHelp.innerHTML = advancedMode
+    ? 'Advanced mode: destructive and document actions are unlocked. Use <strong>delete</strong>, <strong>reset</strong>, <strong>insert</strong>, and <strong>search</strong> carefully.'
+    : 'Simple mode: use <strong>set</strong> to save a value, <strong>get</strong> to ask the model for a key, or <strong>dump</strong> to show everything.';
+  renderInput();
+}
+
+function syncFields(op) {
+  const needsKey = op === 'set' || op === 'get' || op === 'delete' || op === 'search';
+  const needsValue = op === 'set' || op === 'insert' || op === 'search';
+  keyGroup.classList.toggle('is-hidden', !needsKey);
+  valGroup.classList.toggle('is-hidden', !needsValue);
+  keyEl.placeholder = op === 'search' ? 'field or search term' : 'key';
+  valEl.placeholder = op === 'insert' ? '{"id":"user"}' : 'e.g. "GMT+3"';
+}
+
+function normalizeArgs(op, key, value) {
+  return {
+    key: op === 'set' || op === 'get' || op === 'delete' || op === 'search' ? key : '',
+    value: op === 'set' || op === 'insert' || op === 'search' ? value : '',
+  };
+}
+
 function renderInput() {
   const op = opEl.value;
-  const key = keyEl.value.trim();
-  const value = valEl.value.trim();
+  syncFields(op);
+  const { key, value } = normalizeArgs(op, keyEl.value.trim(), valEl.value.trim());
   if (isReadOp(op)) {
     inputEl.textContent = buildReadPrompt(op, key, value);
   } else {
@@ -306,6 +359,7 @@ async function readWithProvider(prompt) {
 }
 
 async function runOp(op, key, value) {
+  ({ key, value } = normalizeArgs(op, key, value));
   if (isReadOp(op)) {
     if (!requireProvider()) return;
     const prompt = buildReadPrompt(op, key, value);
@@ -388,6 +442,8 @@ usePuterBtn.addEventListener('click', async () => {
   }
 });
 
+advancedToggle.addEventListener('click', () => setAdvancedMode(!advancedMode));
+
 runBtn.addEventListener('click', async () => {
   loading(true);
   await runOp(opEl.value, keyEl.value.trim(), valEl.value.trim());
@@ -396,9 +452,9 @@ runBtn.addEventListener('click', async () => {
 
 document.querySelectorAll('.quick-cmds button').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const parts = btn.dataset.cmd.match(/(\S+?)\s+(.+)/);
+    const parts = btn.dataset.cmd.match(/^(\S+)(?:\s+(.+))?$/);
     if (!parts) return;
-    const op = parts[1], rest = parts[2];
+    const op = parts[1], rest = parts[2] || '';
     if (op === 'dump' || op === 'reset') {
       opEl.value = op; keyEl.value = ''; valEl.value = '';
     } else if (op === 'delete') {
@@ -425,7 +481,7 @@ opEl.addEventListener('change', renderInput);
 keyEl.addEventListener('input', renderInput);
 valEl.addEventListener('input', renderInput);
 
-renderInput();
+setAdvancedMode(false);
 outputEl.innerHTML = '<span class="empty">Run a command to see raw output.</span>';
 </script>
 </body>
