@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "praydb"
+version = "0.1.1"
+description = "The only database engine based on gambling and faith."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+urls = {Homepage = "https://github.com/lupc9102/PrayDB"}
+
+[project.scripts]
+praydb = "praydb.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

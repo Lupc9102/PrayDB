@@ -25,7 +25,7 @@ Traditional query scans are inefficient and boring. PrayDB fixes that by process
 
 Jokes aside, here's what this repo actually does.
 
-PrayDB is a Python + JS database where **writes are local JSON edits** and **reads go through an AI model** (OpenRouter / Puter.js). Every time you query your data, the model reads your entire JSON file and answers — it's like having an LLM as your database driver.
+PrayDB is a Python + JS database where **writes go through an AI model (by chunking)** and **reads go through an AI model (the whole file)**. Every time you write or query your data, a model processes it — it's like having an LLM as your database engine and storage driver.
 
 ### How it works
 
@@ -41,13 +41,13 @@ PrayDB is a Python + JS database where **writes are local JSON edits** and **rea
                      │
           ┌──────────┴──────────┐
           │                     │
-    write (local)         read (AI)
+    write (AI chunk)      read (AI full)
     set, delete,          get, dump,
     insert, update        all, search
 ```
 
-- **Writes** — edit the JSON directly, save to disk. Fast, no API cost.
-- **Reads** — send the entire JSON to an OpenRouter model. The model reads it and returns what you asked for.
+- **Writes** — send only the relevant chunk (e.g., table list or specific key) to the AI, let it perform the edit/insert/update/delete, and write back. Medium API cost.
+- **Reads** — send the entire JSON to an OpenRouter model. The model reads it and returns what you asked for. High API cost.
 
 ### Install
 

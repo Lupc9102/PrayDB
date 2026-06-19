@@ -166,6 +166,32 @@ Rules:
 
 Read only. Never modify state. Valid JSON only."""
 
+    WRITE_PROMPT = """You are PrayDB, a database writer. Your job is to modify a specific chunk of the database state.
+
+Chunk path: {chunk_path}
+Current chunk value:
+```json
+{chunk_json}
+```
+
+Request: {operation}
+Details: {details}
+
+Rules:
+- Return ONLY a JSON object with keys "result" and optionally "meta".
+- "result" must contain the modified/new value for this chunk.
+- Do NOT return the entire database state, only the modified chunk value.
+- If the operation is "INSERT", return the updated list of documents under "result". Ensure the new document has a unique integer "_id" (if other documents have integer "_id"s, make it max(ids) + 1, otherwise 1). Under "meta", return a dictionary/object containing the assigned "_id" as "inserted_id".
+- If the operation is "UPDATE", return the updated list of documents under "result". Under "meta", return a dictionary containing "updated_count" (integer).
+- If the operation is "REMOVE", return the updated list of documents under "result". Under "meta", return a dictionary containing "removed_count" (integer).
+- If the operation is "UPSERT", return the updated list of documents under "result". Ensure the document has a unique integer "_id" (if newly inserted). Under "meta", return a dictionary containing "upserted_id" (integer "_id" of the document).
+- If the operation is "SET", return the new value for the key under "result".
+- If the operation is "DELETE", return null under "result".
+- If the operation is "TRUNCATE", return an empty list `[]` under "result".
+- If the operation is "RESET", return an empty object `{{}}` under "result".
+
+Valid JSON only. Never return explanations or markdown other than the JSON object."""
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -318,6 +344,36 @@ Read only. Never modify state. Valid JSON only."""
         parsed = self._extract_json_object(content)
         return parsed.get("result")
 
+    def _write(self, operation: str, chunk_path: List[str], current_chunk: Any, details: str) -> Dict[str, Any]:
+        chunk_json = json.dumps(current_chunk, indent=2, sort_keys=True, ensure_ascii=False)
+        path_str = " -> ".join(chunk_path) if chunk_path else "root"
+        prompt = self.WRITE_PROMPT.format(
+            chunk_path=path_str,
+            chunk_json=chunk_json,
+            operation=operation,
+            details=details,
+        )
+        self.last_prompt = prompt
+        messages = [
+            {"role": "system", "content": "You are PrayDB. Database writer. You modify a chunk of the state and return it as JSON."},
+            {"role": "user", "content": prompt},
+        ]
+        payload: Dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+            "response_format": {"type": "json_object"},
+        }
+        result = self._request_json(payload)
+        choices = result.get("choices") or []
+        if not choices:
+            raise ModelSaidNo("OpenRouter returned no choices.")
+        content = choices[0].get("message", {}).get("content", "")
+        self.last_raw_response = content
+        parsed = self._extract_json_object(content)
+        return parsed
+
     def set(self, key: str, value: Any) -> Dict[str, Any]:
         if not isinstance(key, str) or not key:
             raise PrayDBError("Key must be a non-empty string.")
@@ -325,7 +381,15 @@ Read only. Never modify state. Valid JSON only."""
             json.dumps(value)
         except TypeError as exc:
             raise PrayDBError("Value must be JSON-serializable.") from exc
-        self.state[key] = copy.deepcopy(value)
+        
+        current = self.state.get(key)
+        response = self._write(
+            operation="SET",
+            chunk_path=[key],
+            current_chunk=current,
+            details=f"Set value of key '{key}' to: {json.dumps(value, ensure_ascii=False)}"
+        )
+        self.state[key] = response.get("result")
         self._save()
         return copy.deepcopy(self.state)
 
@@ -335,11 +399,26 @@ Read only. Never modify state. Valid JSON only."""
     def delete(self, key: str) -> Dict[str, Any]:
         if key not in self.state:
             return copy.deepcopy(self.state)
-        del self.state[key]
+        
+        current = self.state.get(key)
+        self._write(
+            operation="DELETE",
+            chunk_path=[key],
+            current_chunk=current,
+            details=f"Delete the key '{key}' and its associated value."
+        )
+        if key in self.state:
+            del self.state[key]
         self._save()
         return copy.deepcopy(self.state)
 
     def reset(self) -> Dict[str, Any]:
+        self._write(
+            operation="RESET",
+            chunk_path=[],
+            current_chunk=self.state,
+            details="Wipe everything. Reset the database state to an empty object."
+        )
         self.state = {}
         self._save()
         return copy.deepcopy(self.state)
@@ -360,14 +439,35 @@ Read only. Never modify state. Valid JSON only."""
             json.dumps(document)
         except TypeError as exc:
             raise PrayDBError("Document must be JSON-serializable.") from exc
+        
         tables = self.state.setdefault("tables", {})
         docs = tables.setdefault(table, [])
-        doc = copy.deepcopy(dict(document))
-        ids = [int(d["_id"]) for d in docs if isinstance(d.get("_id"), int)]
-        doc["_id"] = (max(ids, default=0) + 1)
-        docs.append(doc)
+        
+        response = self._write(
+            operation="INSERT",
+            chunk_path=["tables", table],
+            current_chunk=docs,
+            details=f"Insert the following document into the table list: {json.dumps(document, ensure_ascii=False)}. Assign it a unique integer '_id' by incrementing the max '_id' present in the list, or starting at 1 if list is empty."
+        )
+        
+        new_docs = response.get("result")
+        if not isinstance(new_docs, list):
+            raise PrayDBError("AI did not return a list for the updated table.")
+        
+        tables[table] = new_docs
         self._save()
-        return int(doc["_id"])
+        
+        meta = response.get("meta") or {}
+        inserted_id = meta.get("inserted_id") or meta.get("_id")
+        
+        if inserted_id is None:
+            if new_docs:
+                inserted_id = new_docs[-1].get("_id")
+        
+        if inserted_id is None:
+            raise PrayDBError("AI failed to assign or return a valid '_id'.")
+            
+        return int(inserted_id)
 
     def insert_multiple(self, documents: Iterable[Mapping[str, Any]], table: str = "default") -> List[int]:
         return [self.insert(doc, table) for doc in documents]
@@ -375,60 +475,144 @@ Read only. Never modify state. Valid JSON only."""
     def all(self, table: str = "default") -> Any:
         return self._read("ALL", table=table)
 
+    @staticmethod
+    def _describe_condition(condition: Condition) -> str:
+        if isinstance(condition, NotCondition):
+            return f"NOT ({PrayDB._describe_condition(condition.inner)})"
+        if isinstance(condition, AndCondition):
+            return f"({PrayDB._describe_condition(condition.left)} AND {PrayDB._describe_condition(condition.right)})"
+        if isinstance(condition, OrCondition):
+            return f"({PrayDB._describe_condition(condition.left)} OR {PrayDB._describe_condition(condition.right)})"
+        path = ".".join(str(p) for p in condition.path)
+        if condition.op == "exists":
+            return f"{path} exists"
+        if condition.op == "test":
+            return f"{path} passes custom test"
+        return f"{path} {condition.op} {condition.expected!r}"
+
     def search(self, condition: Condition, table: str = "default") -> Any:
-        return self._read("SEARCH", table=table, condition=str(type(condition).__name__))
+        return self._read("SEARCH", table=table, condition=PrayDB._describe_condition(condition))
 
     def contains(self, condition: Condition, table: str = "default") -> Any:
-        return self._read("CONTAINS", table=table, condition=str(type(condition).__name__))
+        return self._read("CONTAINS", table=table, condition=PrayDB._describe_condition(condition))
 
     def remove(self, condition: Condition, table: str = "default") -> int:
         tables = self.state.setdefault("tables", {})
-        docs = tables.get(table, [])
+        docs = tables.setdefault(table, [])
         before = len(docs)
-        tables[table] = [d for d in docs if not condition.matches(d)]
+        
+        cond_desc = PrayDB._describe_condition(condition)
+        response = self._write(
+            operation="REMOVE",
+            chunk_path=["tables", table],
+            current_chunk=docs,
+            details=f"Remove all documents matching condition: {cond_desc}"
+        )
+        
+        new_docs = response.get("result")
+        if not isinstance(new_docs, list):
+            raise PrayDBError("AI did not return a list for the updated table.")
+        
+        tables[table] = new_docs
         self._save()
-        return before - len(tables[table])
+        
+        meta = response.get("meta") or {}
+        removed_count = meta.get("removed_count")
+        if removed_count is None:
+            removed_count = max(0, before - len(new_docs))
+            
+        return int(removed_count)
 
     def update(self, document: Mapping[str, Any], condition: Optional[Condition] = None, table: str = "default") -> int:
         if not isinstance(document, Mapping):
             raise PrayDBError("update() expects a JSON object.")
+        
         tables = self.state.setdefault("tables", {})
         docs = tables.setdefault(table, [])
+        before = len(docs)
+        
         changes = dict(document)
         changes.pop("_id", None)
-        count = 0
-        for doc in docs:
-            if condition is None or condition.matches(doc):
-                doc.update(copy.deepcopy(changes))
-                count += 1
-        if count:
-            self._save()
-        return count
+        
+        cond_desc = PrayDB._describe_condition(condition) if condition else "All documents"
+        response = self._write(
+            operation="UPDATE",
+            chunk_path=["tables", table],
+            current_chunk=docs,
+            details=f"Update documents matching condition: {cond_desc} by merging these changes: {json.dumps(changes, ensure_ascii=False)}. Do not modify the '_id' field of the documents."
+        )
+        
+        new_docs = response.get("result")
+        if not isinstance(new_docs, list):
+            raise PrayDBError("AI did not return a list for the updated table.")
+            
+        tables[table] = new_docs
+        self._save()
+        
+        meta = response.get("meta") or {}
+        updated_count = meta.get("updated_count")
+        if updated_count is None:
+            if condition is None:
+                updated_count = len(new_docs)
+            else:
+                updated_count = sum(1 for i, doc in enumerate(new_docs) if i < len(docs) and doc != docs[i])
+                
+        return int(updated_count)
 
     def upsert(self, document: Mapping[str, Any], key_field: str = "id", table: str = "default") -> int:
         if not isinstance(document, Mapping):
             raise PrayDBError("upsert() expects a JSON object.")
+            
         tables = self.state.setdefault("tables", {})
         docs = tables.setdefault(table, [])
-        key_value = document.get(key_field)
-        if key_value is None:
-            return self.insert(document, table)
-        for doc in docs:
-            if doc.get(key_field) == key_value:
-                doc.update(copy.deepcopy(dict(document)))
-                self._save()
-                doc_id = doc.get("_id")
-                if doc_id is not None:
-                    return int(doc_id)
-                ids = [int(d["_id"]) for d in docs if isinstance(d.get("_id"), int)]
-                doc["_id"] = (max(ids, default=0) + 1)
-                self._save()
-                return int(doc["_id"])
-        return self.insert(document, table)
+        
+        response = self._write(
+            operation="UPSERT",
+            chunk_path=["tables", table],
+            current_chunk=docs,
+            details=f"Upsert document: {json.dumps(document, ensure_ascii=False)} matching by key_field '{key_field}'. If a document with key_field '{key_field}' equal to '{document.get(key_field)}' exists, update it. Otherwise, insert it and assign it a unique integer '_id'."
+        )
+        
+        new_docs = response.get("result")
+        if not isinstance(new_docs, list):
+            raise PrayDBError("AI did not return a list for the updated table.")
+            
+        tables[table] = new_docs
+        self._save()
+        
+        meta = response.get("meta") or {}
+        upserted_id = meta.get("upserted_id") or meta.get("_id")
+        
+        if upserted_id is None:
+            for doc in new_docs:
+                if doc.get(key_field) == document.get(key_field):
+                    upserted_id = doc.get("_id")
+                    break
+                    
+        if upserted_id is None and new_docs:
+            upserted_id = new_docs[-1].get("_id")
+            
+        if upserted_id is None:
+            raise PrayDBError("AI failed to assign or return a valid '_id'.")
+            
+        return int(upserted_id)
 
     def truncate(self, table: str = "default") -> None:
         tables = self.state.setdefault("tables", {})
-        tables[table] = []
+        docs = tables.setdefault(table, [])
+        
+        response = self._write(
+            operation="TRUNCATE",
+            chunk_path=["tables", table],
+            current_chunk=docs,
+            details=f"Truncate/empty the table '{table}'."
+        )
+        
+        new_docs = response.get("result")
+        if not isinstance(new_docs, list):
+            new_docs = []
+            
+        tables[table] = new_docs
         self._save()
 
     def count(self, table: str = "default") -> int:
