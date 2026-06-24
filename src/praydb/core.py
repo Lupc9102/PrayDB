@@ -195,17 +195,17 @@ Valid JSON only. Never return explanations or markdown other than the JSON objec
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: str = "openai/gpt-4o-mini",
+        model: str = "openai/gpt-5.4-nano",
         file: Optional[str] = None,
-        base_url: str = "https://openrouter.ai/api/v1",
+        base_url: str = "https://ai.hackclub.com/proxy/v1",
         timeout: int = 30,
         retries: int = 3,
         temperature: float = 0,
         max_tokens: int = 2048,
     ) -> None:
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
+        self.api_key = api_key or os.environ.get("HACKCLUB_API_KEY")
         if not self.api_key:
-            raise PrayDBError("Pass api_key= or set OPENROUTER_API_KEY.")
+            raise PrayDBError("Pass api_key= or set HACKCLUB_API_KEY.")
         self.model = model
         self.file = Path(file).expanduser() if file else None
         self.base_url = base_url.rstrip("/")
@@ -254,9 +254,9 @@ Valid JSON only. Never return explanations or markdown other than the JSON objec
                     raw = response.read().decode("utf-8")
                 parsed = json.loads(raw)
                 if not isinstance(parsed, dict):
-                    raise ModelSaidNo(f"OpenRouter returned non-object JSON: {type(parsed).__name__}")
+                    raise ModelSaidNo(f"AI returned non-object JSON: {type(parsed).__name__}")
                 if "error" in parsed:
-                    raise ModelSaidNo(f"OpenRouter returned an error: {parsed['error']}")
+                    raise ModelSaidNo(f"AI returned an error: {parsed['error']}")
                 return parsed
             except ModelSaidNo:
                 raise
@@ -338,7 +338,7 @@ Valid JSON only. Never return explanations or markdown other than the JSON objec
         result = self._request_json(payload)
         choices = result.get("choices") or []
         if not choices:
-            raise ModelSaidNo("OpenRouter returned no choices.")
+            raise ModelSaidNo("AI returned no choices.")
         content = choices[0].get("message", {}).get("content", "")
         self.last_raw_response = content
         parsed = self._extract_json_object(content)
@@ -368,7 +368,7 @@ Valid JSON only. Never return explanations or markdown other than the JSON objec
         result = self._request_json(payload)
         choices = result.get("choices") or []
         if not choices:
-            raise ModelSaidNo("OpenRouter returned no choices.")
+            raise ModelSaidNo("AI returned no choices.")
         content = choices[0].get("message", {}).get("content", "")
         self.last_raw_response = content
         parsed = self._extract_json_object(content)

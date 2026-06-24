@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://js.puter.com/v2/"></script>
+
 <style>
 :root{--paper:#f4efe4;--paper2:#fffaf0;--ink:#11100e;--muted:#6f675d;--line:#11100e;--blue:#0047ff;--red:#ff3b1f;--shadow:18px 18px 0 var(--ink)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:linear-gradient(90deg,rgba(0,71,255,.10) 0 1px,transparent 1px),linear-gradient(rgba(0,71,255,.10) 0 1px,transparent 1px),var(--paper);background-size:42px 42px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Space Grotesk",system-ui,sans-serif;overflow-x:hidden}
@@ -28,35 +29,36 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <p>This popup appears every time you enter the demo. Nothing is saved: API keys, model choices, and provider preferences live only in this tab until you reload or leave.</p>
 <div class="setup-grid">
 <div class="setup-option">
-<h3>OpenRouter</h3>
-<p>Bring your own OpenRouter API key and pick the model used for read operations.</p>
-<label for="openrouterKey">OpenRouter API key</label>
-<input id="openrouterKey" type="password" autocomplete="off" placeholder="sk-or-..." />
-<label for="openrouterModel">Model</label>
-<select id="openrouterModel">
-<option value="cohere/north-mini-code:free">cohere/north-mini-code:free (recommended, free)</option>
-<option value="openai/gpt-5.4-nano">openai/gpt-5.4-nano</option>
-<option value="google/gemini-3.1-flash-lite">google/gemini-3.1-flash-lite</option>
+<h3>Hack Club AI <span class="badge">default</span></h3>
+<p>Powered by <a href="https://docs.ai.hackclub.com/" target="_blank">Hack Club AI</a>. Enter your API key — it lives only in this tab until you reload.</p>
+    <label for="hcKey">Hack Club AI API key</label>
+<input id="hcKey" type="password" autocomplete="off" placeholder="sk-hc-..." />
+<p style="font-size:.76rem;color:var(--muted);margin:4px 0 0">Get a key at <a href="https://docs.ai.hackclub.com/" target="_blank">docs.ai.hackclub.com</a> — it's free.</p>
+<label for="hcModel">Model</label>
+<select id="hcModel">
+<option value="openai/gpt-5.4-nano">openai/gpt-5.4-nano (default)</option>
+<option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+<option value="qwen/qwen3-14b">qwen/qwen3-14b</option>
 </select>
-<div class="setup-actions"><button id="useOpenRouterBtn">Use OpenRouter</button></div>
+<div class="setup-actions"><button class="secondary" id="useHcBtn">Use Hack Club AI</button></div>
 </div>
 <div class="setup-option">
-<h3>Puter.js <span class="badge">default</span></h3>
-<p>Use the built-in Puter.js path with no API key in this demo.</p>
+<h3>Puter.js</h3>
+<p>Use Puter.js with no API key — authenticate in the browser to access its free models.</p>
 <ul>
 <li>Puter.js loads from <code>https://js.puter.com/v2/</code>.</li>
-<li>You must authenticate with Puter in the browser to access its models.</li>
-<li>Puter uses a user-pays flow, so your account covers model usage instead of the site owner. (IT HAS A FREE TRIAL!!)</li>
+<li>You must authenticate with Puter in the browser.</li>
+<li>Puter uses a user-pays flow — your account covers model usage. (Free trial available!)</li>
 </ul>
 <div class="setup-actions"><button class="secondary" id="usePuterBtn">Authenticate with Puter.js</button></div>
 </div>
 </div>
 <p class="setup-error" id="setupError" role="alert"></p>
-<p class="fine-print">Writes like <code>set</code>, <code>delete</code>, <code>reset</code>, and <code>insert</code> are local. Reads like <code>get</code>, <code>dump</code>, and <code>search</code> use the provider you choose here.</p>
+<p class="fine-print">Writes like <code>set</code>, <code>delete</code>, <code>reset</code>, and <code>insert</code> are local. Reads like <code>get</code>, <code>dump</code>, and <code>search</code> use Hack Club AI (your key) or Puter.js (browser auth) — nothing is saved.</p>
 </section>
 </div>
 <main class="wrap">
-<nav class="hero"><a class="home" href="/praydb">&larr; Back</a><h1>PrayDB &middot; Demo</h1><p class="lede">A client-side PrayDB demo where reads can use either your OpenRouter key or authenticated Puter.js. The setup popup appears on every visit and saves nothing.</p><p class="provider-note">Provider:<span id="providerStatus">choose in popup</span></p></nav>
+<nav class="hero"><a class="home" href="/praydb">&larr; Back</a><h1>PrayDB &middot; Demo</h1><p class="lede">A client-side PrayDB demo. Paste a Hack Club AI key or authenticate with Puter.js — reads go to the AI, writes stay local. Nothing leaves this tab.</p><p class="provider-note">Provider:<span id="providerStatus">choose in popup</span></p></nav>
 
 <div class="cmd-bar">
 <div class="field-group"><label>Action</label><select id="op"></select></div>
@@ -102,7 +104,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 
 <div class="tutorial">
 <h2>Tutorial</h2>
-<p><strong>PrayDB</strong> is a little database. Your data is a JSON blob (called a "HolyBook"). Writes happen locally in your browser. Reads go to whichever model provider you picked in the entry popup: OpenRouter with your API key, or Puter.js after browser authentication.</p>
+<p><strong>PrayDB</strong> is a little database. Your data is a JSON blob (called a "HolyBook"). Writes happen locally in your browser. Reads go to Hack Club AI (using your API key) or Puter.js (after browser auth) — whichever you pick in the popup.</p>
 
 <div class="toc-grid">
 <div><b>Simple mode</b> — Load premade databases, save a key, read a key, or dump the whole HolyBook.</div>
@@ -123,7 +125,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 </div>
 
 <h3>How it works</h3>
-<p>When you <strong>write</strong> (set, delete, reset, insert), the demo edits your HolyBook directly — no AI, instant, like a real database. When you <strong>read</strong> (get, dump, search), it sends your HolyBook to the selected model. OpenRouter uses your temporary in-memory key and defaults to <code>cohere/north-mini-code:free</code> because it is free. Puter.js uses <code>gpt-5.4-nano</code> and requires you to authenticate with Puter in the browser. <strong>Input</strong> shows what went <em>in</em>. <strong>Output</strong> shows what came <em>out</em>. If the AI messes up, you'll see an error.</p>
+<p>When you <strong>write</strong> (set, delete, reset, insert), the demo edits your HolyBook directly — no AI, instant, like a real database. When you <strong>read</strong> (get, dump, search), it sends your HolyBook to the Hack Club AI proxy using your API key and model. <strong>Input</strong> shows what went <em>in</em>. <strong>Output</strong> shows what came <em>out</em>. If the AI messes up, you'll see an error.</p>
 </div>
 </main>
 
@@ -140,11 +142,10 @@ const advancedToggle = document.getElementById('advancedToggle');
 const modeHelp = document.getElementById('modeHelp');
 const setupModal = document.getElementById('setupModal');
 const setupError = document.getElementById('setupError');
-const openrouterKeyEl = document.getElementById('openrouterKey');
-const openrouterModelEl = document.getElementById('openrouterModel');
+const hcKeyEl = document.getElementById('hcKey');
+const hcModelEl = document.getElementById('hcModel');
 const providerStatusEl = document.getElementById('providerStatus');
-const useOpenRouterBtn = document.getElementById('useOpenRouterBtn');
-const usePuterBtn = document.getElementById('usePuterBtn');
+const useHcBtn = document.getElementById('useHcBtn');
 
 let holyBook = {};
 let aiProvider = null;
@@ -314,18 +315,16 @@ function closeSetup() {
 function requireProvider() {
   if (aiProvider) return true;
   setupModal.classList.remove('is-hidden');
-  setupError.textContent = 'Pick OpenRouter or authenticate with Puter.js before running AI reads.';
+  setupError.textContent = 'Pick Hack Club AI before running AI reads.';
   return false;
 }
 
-async function readWithOpenRouter(prompt) {
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+async function readWithHackClub(prompt) {
+  const res = await fetch('https://ai.hackclub.com/proxy/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${aiProvider.apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': location.href,
-      'X-Title': 'PrayDB Demo',
     },
     body: JSON.stringify({
       model: aiProvider.model,
@@ -336,26 +335,13 @@ async function readWithOpenRouter(prompt) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data?.error?.message || `OpenRouter request failed (${res.status})`);
+    throw new Error(data?.error?.message || `Hack Club AI request failed (${res.status})`);
   }
   return data?.choices?.[0]?.message?.content || '';
 }
 
-async function readWithPuter(prompt) {
-  if (!window.puter?.ai?.chat) {
-    throw new Error('Puter.js is not loaded yet. Refresh the page and try authenticating again.');
-  }
-  const res = await window.puter.ai.chat(prompt, {
-    model: 'gpt-5.4-nano',
-    temperature: 0,
-    max_tokens: 4096,
-  });
-  return typeof res === 'string' ? res : (res?.message?.content || res?.toString?.() || '');
-}
-
 async function readWithProvider(prompt) {
-  if (aiProvider.type === 'openrouter') return readWithOpenRouter(prompt);
-  return readWithPuter(prompt);
+  return readWithHackClub(prompt);
 }
 
 async function runOp(op, key, value) {
@@ -413,33 +399,17 @@ async function runOp(op, key, value) {
   }
 }
 
-useOpenRouterBtn.addEventListener('click', () => {
-  const apiKey = openrouterKeyEl.value.trim();
-  const model = openrouterModelEl.value;
+useHcBtn.addEventListener('click', () => {
+  const apiKey = hcKeyEl.value.trim();
+  const model = hcModelEl.value;
   if (!apiKey) {
-    setupError.textContent = 'Enter an OpenRouter API key, or choose Puter.js instead.';
-    openrouterKeyEl.focus();
+    setupError.textContent = 'Enter a Hack Club AI API key to continue.';
+    hcKeyEl.focus();
     return;
   }
-  aiProvider = { type: 'openrouter', apiKey, model };
-  providerStatusEl.textContent = `OpenRouter / ${model}`;
+  aiProvider = { type: 'hackclub', apiKey, model };
+  providerStatusEl.textContent = `Hack Club AI / ${model}`;
   closeSetup();
-});
-
-usePuterBtn.addEventListener('click', async () => {
-  setupError.textContent = 'Opening Puter authentication...';
-  usePuterBtn.disabled = true;
-  try {
-    if (!window.puter) throw new Error('Puter.js did not load. Check your connection and refresh.');
-    if (window.puter.auth?.signIn) await window.puter.auth.signIn();
-    aiProvider = { type: 'puter', model: 'gpt-5.4-nano' };
-    providerStatusEl.textContent = 'Puter.js / gpt-5.4-nano';
-    closeSetup();
-  } catch (e) {
-    setupError.textContent = `Puter authentication failed: ${e.message}`;
-  } finally {
-    usePuterBtn.disabled = false;
-  }
 });
 
 advancedToggle.addEventListener('click', () => setAdvancedMode(!advancedMode));

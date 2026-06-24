@@ -35,13 +35,14 @@ a{color:var(--ink)}
 <main class="wrap">
 <p class="kicker">Only PrayDB. No side quests.</p>
 <h1>PrayDB</h1>
-<p>A cursed Python database that stores JSON in an LLM context window, asks a model to merge it, and prays the answer is valid JSON.</p>
+<p>A cursed Python database that stores JSON in an LLM context window, asks a model to merge it (via the <a href="https://docs.ai.hackclub.com/">Hack Club AI</a> proxy), and prays the answer is valid JSON.</p>
 <div class="layout">
 <div class="toc"><a href="#what">What it is</a><a href="#install">Install</a><a href="#cli">CLI</a><a href="#python">Python API</a><a href="#architecture">Architecture</a><a href="#settings">Model settings</a><a href="#warnings">Warnings</a><a href="#files">Files</a></div>
-<section class="doc-section" id="what"><h2>What it is</h2><p>PrayDB is a tiny Python library and CLI. It keeps a JSON prompt-scroll for a user id, sends that state plus an operation to an OpenRouter model, parses the response, and stores the resulting JSON.</p></section>
+<section class="doc-section" id="what"><h2>What it is</h2><p>PrayDB is a tiny Python library and CLI. It keeps a JSON prompt-scroll for a user id, sends that state plus an operation to an AI model (via the <a href="https://docs.ai.hackclub.com/">Hack Club AI</a> proxy), parses the response, and stores the resulting JSON.</p></section>
 <section class="doc-section" id="install"><h2>Install</h2><pre>cd praydb
-python3 -m pip install -e .</pre><h3>Environment</h3><pre>export OPENROUTER_API_KEY="sk-or-..."
-export PRAYDB_MODEL="provider/sacrifice_model"</pre></section>
+python3 -m pip install -e .</pre><h3>Environment (optional)</h3><pre># A built-in shared Hack Club AI key is used by default
+# export HACKCLUB_API_KEY="sk-hc-..."
+export PRAYDB_MODEL="provider/model"</pre></section>
 <section class="doc-section" id="cli"><h2>CLI</h2><pre>praydb --user-id lupc set timezone "GMT+3"
 praydb --user-id lupc set vibe "only PrayDB"
 praydb --user-id lupc get timezone
@@ -52,8 +53,8 @@ praydb --user-id lupc doctor</pre><p>By default, PrayDB stores the prompt-scroll
 <section class="doc-section" id="python"><h2>Python API</h2><pre>from praydb import PrayDB, Query
 
 db = PrayDB(
-    api_key="sk-or-...",
-    model="provider/expandable-sacrifice_model",
+    # api_key="sk-hc-...",  # optional — built-in shared key used by default
+    model="qwen/qwen3-32b",
     user_id="user",
 )
 
@@ -70,8 +71,8 @@ print(db.search(User.timezone == "GMT+3"))
 print(db.dump())</pre></section>
 <section class="doc-section" id="architecture"><h2>Architecture</h2><div class="grid"><div class="box"><b>1. Scroll</b><p>A JSON object is kept as the user's prompt-scroll.</p></div><div class="box"><b>2. Prompt</b><p>Every operation inserts the scroll and requested change into a model prompt.</p></div><div class="box"><b>3. Merge</b><p>The model must return one valid JSON object.</p></div><div class="box warn"><b>4. Validate</b><p>Prose responses are rejected. Bad JSON means retry or error.</p></div></div></section>
 <section class="doc-section" id="settings"><h2>Model settings</h2><p>PrayDB defaults to low-temperature, JSON-object responses. Keep temperature at <code>0</code> unless you want the database to improvise jazz.</p><pre>db = PrayDB(
-    api_key="sk-or-...",
-    model="provider/expandable-sacrifice_model",
+    # api_key="sk-hc-...",  # optional
+    model="qwen/qwen3-32b",
     user_id="user",
     temperature=0,
     max_tokens=2048,

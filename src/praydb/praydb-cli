@@ -31,7 +31,7 @@ def _default_context_file(user_id: str) -> str:
 
 
 def _make_db(args: argparse.Namespace) -> PrayDB:
-    api_key = args.api_key or os.environ.get("OPENROUTER_API_KEY")
+    api_key = args.api_key or os.environ.get("HACKCLUB_API_KEY")
     context_file = None if args.no_context_file else (args.context_file or _default_context_file(args.user_id))
     return PrayDB(
         api_key=api_key,
@@ -52,12 +52,12 @@ def build_parser() -> argparse.ArgumentParser:
         description="PrayDB: the database that stores your data in an LLM context window and prays.",
         epilog="Examples: praydb set lupc timezone GMT+3; praydb dump; praydb doctor",
     )
-    parser.add_argument("--api-key", help="OpenRouter API key. Defaults to OPENROUTER_API_KEY.")
-    parser.add_argument("--model", default="openai/gpt-4o-mini", help="OpenRouter model name.")
+    parser.add_argument("--api-key", help="Hack Club AI API key. Defaults to HACKCLUB_API_KEY or built-in shared key.")
+    parser.add_argument("--model", default="qwen/qwen3-32b", help="Model name.")
     parser.add_argument("--user-id", default="default", help="User namespace/id.")
     parser.add_argument("--context-file", help="Local prompt-scroll JSON file. Default: ~/.praydb/<user-id>.json")
     parser.add_argument("--no-context-file", action="store_true", help="Do not read/write a local context file.")
-    parser.add_argument("--base-url", default="https://openrouter.ai/api/v1", help="OpenRouter-compatible base URL.")
+    parser.add_argument("--base-url", default="https://ai.hackclub.com/proxy/v1", help="OpenAI-compatible base URL.")
     parser.add_argument("--timeout", type=int, default=30, help="HTTP timeout in seconds.")
     parser.add_argument("--retries", type=int, default=3, help="Retry attempts for model calls.")
     parser.add_argument("--temperature", type=float, default=0, help="Model temperature. Keep it 0 unless you want jazz.")

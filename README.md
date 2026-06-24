@@ -47,14 +47,15 @@ PrayDB is a Python + JS database where **writes go through an AI model (by chunk
 ```
 
 - **Writes** — send only the relevant chunk (e.g., table list or specific key) to the AI, let it perform the edit/insert/update/delete, and write back. Medium API cost.
-- **Reads** — send the entire JSON to an OpenRouter model. The model reads it and returns what you asked for. High API cost.
+- **Reads** — send the entire JSON to an AI model via the Hack Club AI proxy. The model reads it and returns what you asked for. High API cost.
 
 ### Install
 
 ```bash
 cd praydb
 python3 -m pip install -e .
-export OPENROUTER_API_KEY="sk-or-..."
+# Optional: set a custom Hack Club AI key (a built-in shared key is used by default)
+# export HACKCLUB_API_KEY="sk-hc-..."
 ```
 
 ### CLI
@@ -74,7 +75,7 @@ praydb doctor
 ```python
 from praydb import PrayDB, Query, Condition
 
-db = PrayDB(api_key="sk-or-...", model="openai/gpt-4o-mini")
+db = PrayDB(model="qwen/qwen3-32b")  # uses built-in shared Hack Club AI key by default
 
 # Writes are local — no AI
 db.set("timezone", "GMT+3")
@@ -122,5 +123,5 @@ print(db.search(User.role == "owner"))
 ### Deployment
 
 - **Docs**: [lupc.xyz/praydb](https://lupc.xyz/praydb)
-- **Demo**: [lupc.xyz/praydb-demo](https://lupc.xyz/praydb-demo) — client-side Puter.js demo, `gpt-5.4-nano`
+- **Demo**: [lupc.xyz/praydb-demo](https://lupc.xyz/praydb-demo) — client-side Hack Club AI demo, `qwen/qwen3-32b`
 - **Repo**: [github.com/Lupc9102/PrayDB](https://github.com/Lupc9102/PrayDB)

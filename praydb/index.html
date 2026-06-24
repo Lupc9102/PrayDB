@@ -24,8 +24,9 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;ba
 <article class="docs">
 <section class="doc-section reveal" id="what"><h2>What it is</h2><p>PrayDB is a Python library and CLI. Everything lives in one JSON file. <strong>Writes</strong> are processed by the AI in chunks. <strong>Reads</strong> go through an AI model that looks at your entire database and answers.</p></section>
 <section class="doc-section reveal" id="install"><h2>Install</h2><pre>cd praydb
-python3 -m pip install -e .</pre><h3>Env</h3><pre>export OPENROUTER_API_KEY="sk-or-..."
-export PRAYDB_MODEL="provider/sacrifice_model"</pre></section>
+python3 -m pip install -e .</pre><h3>Env (optional)</h3><pre># A built-in shared Hack Club AI key is used by default
+# export HACKCLUB_API_KEY="sk-hc-..."
+export PRAYDB_MODEL="provider/model"</pre></section>
 <section class="doc-section reveal" id="cli"><h2>CLI</h2><pre>praydb set timezone "GMT+3"
 praydb set vibe "only PrayDB"
 praydb get timezone
@@ -35,7 +36,7 @@ praydb reset
 praydb doctor</pre><p>Database stored at <code>~/.praydb/db.json</code>.</p></section>
 <section class="doc-section reveal" id="python"><h2>Python API</h2><pre>from praydb import PrayDB, Query
 
-db = PrayDB(api_key="sk-or-...", model="openai/gpt-4o-mini")
+db = PrayDB(model="qwen/qwen3-32b")  # uses built-in shared Hack Club AI key
 
 db.set("timezone", "GMT+3")
 db.set("vibe", {"ui": "squared", "chaos": "low"})
@@ -48,8 +49,8 @@ print(db.search(User.timezone == "GMT+3"))
 print(db.dump())</pre></section>
 <section class="doc-section reveal" id="architecture"><h2>Architecture</h2><div class="grid"><div class="box"><b>1. One JSON file</b><p>All data lives in <code>~/.praydb/db.json</code>.</p></div><div class="box"><b>2. Writes via AI</b><p>Set, delete, insert send a chunk to the AI to modify.</p></div><div class="box"><b>3. Reads via AI</b><p>Get, dump, search send the JSON to the model.</p></div><div class="box warn"><b>4. Validate</b><p>Bad JSON from the model is rejected.</p></div></div></section>
 <section class="doc-section reveal" id="settings"><h2>Model settings</h2><pre>db = PrayDB(
-    api_key="sk-or-...",
-    model="openai/gpt-4o-mini",
+    # api_key="sk-hc-...",  # optional — built-in shared key used by default
+    model="qwen/qwen3-32b",
     temperature=0,
     max_tokens=2048,
     retries=2,

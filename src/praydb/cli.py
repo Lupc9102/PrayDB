@@ -26,10 +26,10 @@ def build_parser() -> argparse.ArgumentParser:
         prog="praydb",
         description="PrayDB: the database that stores everything in one JSON file and prays.",
     )
-    parser.add_argument("--api-key", help="OpenRouter API key. Defaults to OPENROUTER_API_KEY.")
-    parser.add_argument("--model", default="openai/gpt-4o-mini", help="OpenRouter model name.")
+    parser.add_argument("--api-key", help="Hack Club AI API key. Defaults to HACKCLUB_API_KEY.")
+    parser.add_argument("--model", default="openai/gpt-5.4-nano", help="Model name.")
     parser.add_argument("--file", default=None, help="JSON file path. Default: ~/.praydb/db.json")
-    parser.add_argument("--base-url", default="https://openrouter.ai/api/v1", help="OpenRouter-compatible base URL.")
+    parser.add_argument("--base-url", default="https://ai.hackclub.com/proxy/v1", help="OpenAI-compatible base URL.")
     parser.add_argument("--timeout", type=int, default=30, help="HTTP timeout in seconds.")
     parser.add_argument("--retries", type=int, default=3, help="Retry attempts for model calls.")
     parser.add_argument("--temperature", type=float, default=0, help="Model temperature.")
@@ -61,7 +61,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     file = args.file or str(Path.home() / ".praydb" / "db.json")
-    api_key = args.api_key or os.environ.get("OPENROUTER_API_KEY")
+    api_key = args.api_key or os.environ.get("HACKCLUB_API_KEY")
 
     try:
         db = PrayDB(

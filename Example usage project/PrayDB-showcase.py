@@ -340,13 +340,13 @@ def repl(db: PrayDB):
             console.print(f"[red]Error:[/red] {e}")
 
 def main():
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = os.getenv("HACKCLUB_API_KEY")
     if not api_key:
         console.print(Panel(
-            "[bold red]OPENROUTER_API_KEY not set.[/bold red]\n\n"
+            "[bold red]HACKCLUB_API_KEY not set.[/bold red]\n\n"
             "Export it first:\n"
-            "[cyan]export OPENROUTER_API_KEY=sk-or-...[/cyan]\n\n"
-            "Get a key at [link=https://openrouter.ai]openrouter.ai[/link] (free tier available).",
+            "[cyan]export HACKCLUB_API_KEY=sk-hc-...[/cyan]\n\n"
+            "Get a key at [link=https://docs.ai.hackclub.com]docs.ai.hackclub.com[/link] (free).",
             title="Missing API Key",
             border_style="red",
         ))
@@ -355,7 +355,7 @@ def main():
     print_banner()
     db = PrayDB(
         api_key=api_key,
-        model="openai/gpt-5.4-nano", # cheapest bullsht that might not hallucinate
+        model="openai/gpt-5.4-nano",
     )
 
     console.print(f"[dim]model:[/dim] [cyan]{db.model}[/cyan]   "
